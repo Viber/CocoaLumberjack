@@ -240,12 +240,12 @@
 	
 	if (hasProperPrefix && hasProperLength)
 	{
-		NSCharacterSet *hexSet = [NSCharacterSet characterSetWithCharactersInString:@"0123456789ABCDEF"];
+		NSCharacterSet *digitsSet = [NSCharacterSet characterSetWithCharactersInString:@"0123456789"];
 		
-		NSString *hex = [fileName substringWithRange:NSMakeRange(4, 6)];
-		NSString *nohex = [hex stringByTrimmingCharactersInSet:hexSet];
+		NSString *digits = [fileName substringWithRange:NSMakeRange(4, fileName.length-8)]; // log- and .log
+		NSString *noDigits = [digits stringByTrimmingCharactersInSet:digitsSet];
 		
-		if ([nohex length] == 0)
+		if ([noDigits length] == 0)
 		{
 			return YES;
 		}
@@ -377,15 +377,7 @@
 **/
 - (NSString *)generateShortUUID
 {
-	CFUUIDRef uuid = CFUUIDCreate(NULL);
-	
-	CFStringRef fullStr = CFUUIDCreateString(NULL, uuid);
-	NSString *result = (__bridge_transfer NSString *)CFStringCreateWithSubstring(NULL, fullStr, CFRangeMake(0, 6));
-	
-	CFRelease(fullStr);
-	CFRelease(uuid);
-	
-	return result;
+    return [@(time(NULL)) stringValue];
 }
 
 /**
@@ -398,7 +390,7 @@
 	NSString *logsDirectory = [self logsDirectory];
 	do
 	{
-		NSString *fileName = [NSString stringWithFormat:@"log-%@.txt", [self generateShortUUID]];
+		NSString *fileName = [NSString stringWithFormat:@"log-%@.log", [self generateShortUUID]];
 		
 		NSString *filePath = [logsDirectory stringByAppendingPathComponent:fileName];
 		
@@ -781,7 +773,7 @@
 		{
 			DDLogFileInfo *mostRecentLogFileInfo = [sortedLogFileInfos objectAtIndex:0];
 			
-			BOOL useExistingLogFile = YES;
+			BOOL useExistingLogFile = NO;
 			BOOL shouldArchiveMostRecent = NO;
 			
 			if (mostRecentLogFileInfo.isArchived)
